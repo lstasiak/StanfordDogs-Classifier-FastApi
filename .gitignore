@@ -1,0 +1,10 @@
+.DS_Store
+*.pyc
+mypy.ini
+test_models
+*.ipynb
+.ipynb_checkpoints
+.idea
+dataset
+*.sublime-project
+*.sublime-workspace

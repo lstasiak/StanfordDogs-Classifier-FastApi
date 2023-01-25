@@ -1,0 +1,43 @@
+services:
+  web:
+    container_name: web
+    build: .
+    ports:
+      - "8000:8000"
+    command: uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000
+    shm_size: 6gb # increase in case of error loading data when training model on docker
+    volumes:
+      - .:/src/
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+    image: "lukstasiak/fast-api-ml-multilabel-classification"
+    restart: unless-stopped
+    networks:
+      - ml_app_network
+
+  celery:
+    container_name: celery
+    build: .
+    command: celery -A src.app.tasks worker -l INFO
+    volumes:
+      - .:/src/
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - web
+      - redis
+    networks:
+      - ml_app_network
+
+  redis:
+    container_name: redis
+    image: redis
+    networks:
+      - ml_app_network
+
+networks:
+    ml_app_network:
