@@ -16,5 +16,7 @@ RUN pip install -r /code/requirements.txt
 COPY src /code/src
 COPY dataset /code/dataset
 COPY resources /code/resources
+COPY .env /code/.env
+COPY alembic.ini /code/alembic.ini
 
 #CMD ["uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "80"]

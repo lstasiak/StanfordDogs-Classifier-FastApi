@@ -11,7 +11,8 @@ from torchvision.models import (
 
 from src.utils import get_labels
 
-PROJECT_ROOT = os.path.abspath(os.curdir)
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
 
 # DATASET LINKS
 DATA_DIR = os.path.join(PROJECT_ROOT, "dataset/images/Images")

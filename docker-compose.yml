@@ -1,20 +1,39 @@
 services:
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ml_app_network
   web:
     container_name: web
     build: .
     ports:
       - "8000:8000"
-    command: uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000
+    command: > 
+      sh -c "alembic upgrade head &&
+             uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000"
     shm_size: 6gb # increase in case of error loading data when training model on docker
     volumes:
-      - .:/src/
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - .:/code
+    env_file:
+      - .env
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     image: "lukstasiak/fast-api-ml-multilabel-classification"
-    restart: unless-stopped
     networks:
       - ml_app_network
 
@@ -23,10 +42,9 @@ services:
     build: .
     command: celery -A src.app.tasks worker -l INFO
     volumes:
-      - .:/src/
-    environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - .:/code
+    env_file:
+      - .env
     depends_on:
       - web
       - redis
@@ -40,4 +58,7 @@ services:
       - ml_app_network
 
 networks:
-    ml_app_network:
+  ml_app_network:
+
+volumes:
+  postgres_data:

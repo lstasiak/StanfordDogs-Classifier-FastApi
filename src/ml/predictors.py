@@ -72,7 +72,7 @@ class ImagePredictor:
             outputs = self.model(trf_image)
         predictions = torch.nn.functional.softmax(outputs, dim=1)
         pred_values = predictions.cpu().data.numpy().squeeze()
-        data = {cls: pred_values[i] for i, cls in enumerate(DEFAULT_CLASS_NAMES)}
+        data = {cls: float(pred_values[i]) for i, cls in enumerate(DEFAULT_CLASS_NAMES)}
 
         sorted_by_prob = sorted(data.items(), key=lambda x: x[1], reverse=True)
         sorted_by_prob_map = dict(sorted_by_prob)

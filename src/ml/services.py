@@ -76,7 +76,9 @@ def f1_score(
     return f1
 
 
-def view_prediction(img, predictions: dict, ground_truth=None) -> None:
+def view_prediction(
+    img, predictions: dict, ground_truth: str = None, save: str = None
+) -> None:
     """
     utility to visualize image and prediction results
     """
@@ -94,7 +96,7 @@ def view_prediction(img, predictions: dict, ground_truth=None) -> None:
             f"{pred_class}",
             f"with: {100 * pred_value:.1f}% confidence",
         ]
-        if ground_truth == pred_class:
+        if ground_truth.lower() == pred_class.lower():
             colors = ["black", "green", "black"]
         else:
             colors = ["black", "red", "black"]
@@ -117,7 +119,8 @@ def view_prediction(img, predictions: dict, ground_truth=None) -> None:
     ax2.set_title("Predicted Class")
     ax2.set_xlim(0, 1.1)
     plt.tight_layout()
-    plt.show()
+    if save is not None:
+        fig.savefig(save, format="JPEG")
 
 
 def get_file_name(model_name: str, extension: str, **kwargs) -> str:
