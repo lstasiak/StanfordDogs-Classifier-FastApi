@@ -5,14 +5,14 @@ CREATE_IMAGE_QUERY = """
                      """
 
 GET_IMAGE_BY_ID_QUERY = """
-                            SELECT *
-                            FROM images
-                            WHERE id = :id;
+                           SELECT *
+                           FROM images
+                           WHERE id = :id;
                         """
 
 LIST_ALL_IMAGES_QUERY = """
-                            SELECT *
-                            FROM images
+                           SELECT *
+                           FROM images
                         """
 
 UPDATE_IMAGE_PREDICTIONS_QUERY = """
@@ -23,7 +23,7 @@ UPDATE_IMAGE_PREDICTIONS_QUERY = """
                                  """
 
 DELETE_IMAGE_BY_ID_QUERY = """
-                                 DELETE FROM images
-                                 WHERE id = :id
-                                 RETURNING id;
-                              """
+                              DELETE FROM images
+                              WHERE id = :id
+                              RETURNING id;
+                           """

@@ -1,17 +1,13 @@
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Json
+from pydantic import BaseModel, Field, Json
 
 
 class Device(Enum):
     cpu = "cpu"
     gpu = "gpu"
     mps = "mps"
-
-
-class IDModelMixin:
-    id: str
 
 
 class BaseImage(BaseModel):
@@ -33,7 +29,6 @@ class ImageUpdate(BaseImage):
     predictions: Json
 
 
-class ImageInDB(IDModelMixin, BaseImage):
-    id: int
+class ImageInDB(BaseImage):
+    id: int = Field(ge=1, description="Image id as the positive integer")
     file: str
-    predictions: Json

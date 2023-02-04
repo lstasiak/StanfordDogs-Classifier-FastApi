@@ -51,8 +51,8 @@ images: ## Show all images
 exec: ## Exec container
 	docker-compose -f $(or $(DOCKER_COMPOSE_FILE), docker-compose.yml) exec $(or $(c), web) bash
 
-check:
-	docker-compose exec $(or $(c), web) pre-commit run $(or $(e), --all-files)
+#check:
+#	docker-compose exec $(or $(c), web) pre-commit run $(or $(e), --all-files)
 
 mypy:
 	docker-compose  exec $(or $(c), web) mypy $(or $(e), .)
@@ -62,13 +62,13 @@ perform: ## Perform code by black, isort
 	docker-compose  exec $(or $(c), web) isort --profile black $(or $(e), .)
 
 predict: ## Perform prediction using python script
-	docker-compose  exec $(or $(c), web) python src/inference.py
+	docker-compose  exec $(or $(c), web) python src/scripts/inference.py
 
 train-model: ## Perform model training without saving
-	docker-compose  exec $(or $(c), web) python src/model_training.py --epochs $(or $(e), 1) -lr $(or $(e), 10e-4)
+	docker-compose  exec $(or $(c), web) python src/scripts/model_training.py --epochs $(or $(e), 1) -lr $(or $(e), 10e-4)
 
 train-model-save: ## Perform model training with saving
-	docker-compose  exec $(or $(c), web) python src/model_training.py --epochs $(or $(e), 1) -lr $(or $(e), 10e-4) --save
+	docker-compose  exec $(or $(c), web) python src/scripts/model_training.py --epochs $(or $(e), 1) -lr $(or $(e), 10e-4) --save
 
 tests:
-	docker-compose exec web pytest -k "tests"
+	docker-compose exec web pytest -v

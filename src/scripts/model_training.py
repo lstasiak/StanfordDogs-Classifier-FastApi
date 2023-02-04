@@ -3,17 +3,17 @@ import os
 
 import torch
 
-from settings import (
+from src.ml.data_managers import DatasetCollector
+from src.ml.services import get_default_model, get_file_name
+from src.ml.trainers import Trainer
+from src.settings import (
     DATA_DIR,
     DEFAULT_SAVE_MODEL_DIR,
     DEFAULT_TRAINING_HISTORY_DIR,
     NUM_CLASSES,
     PARAMETERS,
 )
-from src.ml.data_managers import DatasetCollector
-from src.ml.services import get_default_model, get_file_name
-from src.ml.trainers import Trainer
-from utils import get_user_device
+from src.utils import get_user_device
 
 
 def main():
@@ -43,11 +43,11 @@ def main():
         criterion=PARAMETERS["criterion"],
         epochs=args["epochs"],
         optim_fcn=PARAMETERS["optim_fcn"],
-        device=device if device is not None else PARAMETERS["device"],
+        device=device,
         lr=args["learning_rate"],
     )
     print("=" * 37)
-    print(f"""Start model training on device: {PARAMETERS["device"]}""")
+    print(f"""Start model training on device: {device}""")
     print("=" * 37)
     history_filename = get_file_name(
         model.base_name,
@@ -89,7 +89,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     # construct the argument parser
     parser = argparse.ArgumentParser()
     parser.add_argument(

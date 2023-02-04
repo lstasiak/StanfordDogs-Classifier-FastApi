@@ -8,3 +8,5 @@ test_models
 dataset
 *.sublime-project
 *.sublime-workspace
+pytest.ini
+.pytest_cache

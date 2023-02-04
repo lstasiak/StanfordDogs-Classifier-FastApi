@@ -1,5 +1,7 @@
 # ML multiclass- classification service
 
+[![Python CI](https://github.com/lstasiak/StanfordDogs-Classifier-FastApi/actions/workflows/python.yaml/badge.svg)](https://github.com/lstasiak/StanfordDogs-Classifier-FastApi/actions/workflows/python.yaml)
+
 ## About the project
 This project consists of the Machine Learning service for image
 classification task, created with FastAPI. The project is managed by Docker-Compose app and connects the following
@@ -26,13 +28,13 @@ so the project won't crash at the start.
 
 ## Dataset & model
 The task is defined as the multi-label-classification problem. The chosen
-CNN model consists of the base model, which is pre-trained **EfficientNet_V2** network
+CNN model consists of the base model, which is pre-trained **ResNet18** network
 and head model - Sequential model composed of FeedForward Neural Networks.
 
 Dataset for this task consists of 20,580 images of different dog breeds, so
 the task is 120-class classification problem.
 
-Currently, saved "best" model performs with ~65% accuracy on validation set, but training
+Currently, saved "best" model performs with ~70% accuracy on validation set, but training
 with larger epochs can probably increase this result.
 
 ## Functionality
@@ -41,7 +43,7 @@ with larger epochs can probably increase this result.
 To start the docker-compose application we can simply run (being located in project dir)
 in terminal:
 ```shell
-docker-compose up --rebuild
+docker-compose up --build
 ```
 or equivalently with make command (using Makefile):
 ```shell
@@ -50,15 +52,15 @@ make build
 After build is completed we should see then logs of started three services: web, celery and redis.
 The API should be accessible on localhost with port 8000 (check logs), e.g. http://0.0.0.0:8000.
 ### API Walkthrough
-To simply test the api functionality we can use documentation: http://0.0.0.0:8000/docs, 
+To simply test the api functionality we can use documentation: http://0.0.0.0:8000/docs,
 check the endpoint and execute `Try it out`
 ### Upload image
 The endpoint for creating new image object is available through: http://0.0.0.0:8000/api/upload.
 Fields: `filename` and `ground_truth` are optional and not providing them does
 not raise any exceptions (although `ground_truth` is used to confirm predicted class in the image from `images/id/view`
-endpoint). 
+endpoint).
 
-**Example response**: 
+**Example response**:
 ```python
 {
   "filename": "test",
@@ -78,7 +80,7 @@ To start making predictions:
 4. You can also pass optional device argument ["cpu", "gpu", "mps"] and the inference will be performed on it if the device is accessible, otherwise it will run on default device.
 5. Click **Execute** and check the response.
 
-**Example response**: 
+**Example response**:
 ```python
 {
   "data": {
@@ -92,7 +94,7 @@ To start making predictions:
 To list all images from db or get specific image object by passing id, use:
 http://0.0.0.0:8000/api/images or http://0.0.0.0:8000/api/images/{id}
 
-**Example response** (get image by id): 
+**Example response** (get image by id):
 ```python
 {
   "data": {
@@ -225,7 +227,7 @@ http://0.0.0.0:8000/api/images or http://0.0.0.0:8000/api/images/{id}
 }
 ```
 Here `predictions` field will be non-empty after making predict post request.
-Also note that `file` field was excluded from response purposely (as well as from list of images endpoint). 
+Also note that `file` field was excluded from response purposely (as well as from list of images endpoint).
 
 ### View predictions
 We can view predicted result on given image using http://0.0.0.0:8000/api/images/{id}/view endpoint.
@@ -252,7 +254,7 @@ make train-model
 ```
 or using docker-compose. Example below runs training with applied head model on 10 epochs with batch size = 64 for ResNet model. The other available model is `"EfficientNet"` and with save model option.
 ```shell
-docker-compose exec web python src/model_training.py --epochs=10 --batch=64 --model="ResNet" --save --extractor
+docker-compose exec web python src/scripts/model_training.py --epochs=10 --batch=64 --model="ResNet" --save --extractor
 ```
 So model training can be run with the following settings:
 - epochs, batch, learning rate
@@ -260,7 +262,7 @@ So model training can be run with the following settings:
 - different type of architecture functionality: with head model (so the base weights are frozen) or in the fine-tuning mode.
 
 ### Other
-We can check model training data as Loss value, Accuracy and F_score both on training and test dataset
+We can check model training data such as Loss value, Accuracy and F_score both on training and test dataset
 by checking: http://0.0.0.0:8000/api/stats/
 
 Other functionalities defined in Makefile include e.g. code reformatting using black and isort.
@@ -269,6 +271,6 @@ Other functionalities defined in Makefile include e.g. code reformatting using b
 - [x] Separate prediction and upload image endpoints
 - [x] Perform celery prediction task in the background (combined with async function)
 - [ ] Increase model performance
-- [ ] Add tests
+- [x] Add tests (app tests completed!)
 - [x] Make prediction visualizations available from API
-- [ ] github workflow
+- [x] github workflow 

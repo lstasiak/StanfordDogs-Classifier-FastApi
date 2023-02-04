@@ -1,11 +1,18 @@
+import time
 from io import BytesIO
 
 import pandas as pd
-from celery.result import AsyncResult
-from fastapi import APIRouter, Depends, File, HTTPException, Path, UploadFile
+from celery import states
+from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
 from PIL import Image
 from starlette.responses import JSONResponse, StreamingResponse
-from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_404_NOT_FOUND
+from starlette.status import (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_404_NOT_FOUND,
+    HTTP_422_UNPROCESSABLE_ENTITY,
+)
 
 from src.app.config import API_PREFIX
 from src.app.db.repositories.images import ImagesRepository
@@ -19,7 +26,12 @@ from src.utils import encode_decode_img
 api = APIRouter(prefix=API_PREFIX, tags=["api"])
 
 
-@api.post("/upload", response_model=ImageInDB, status_code=HTTP_201_CREATED)
+@api.post(
+    "/upload",
+    response_model=ImageInDB,
+    status_code=HTTP_201_CREATED,
+    name="upload_image",
+)
 async def upload_image(
     file: UploadFile = File(...),
     repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
@@ -29,23 +41,22 @@ async def upload_image(
     """
     Endpoint to handle image object creation
     """
-    if not file:
-        raise HTTPException(status_code=404, detail="Image file not found.")
 
-    extension = file.filename.split(".")[-1] in ("jpg", "jpeg", "png")
-    if not extension:
-        return HTTPException(status_code=400, detail="Image must be jpg or png format!")
+    if file.content_type not in [f"image/{ext}" for ext in ("jpg", "jpeg", "png")]:
+        raise HTTPException(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Invalid image file extension.",
+        )
 
     decoded_file: str = encode_decode_img(file.file.read(), serialize=True)
 
     image = ImageCreate(filename=filename, file=decoded_file, ground_truth=ground_truth)
-    # image_repo = get_repository(ImagesRepository)
     new_image = await repo.create_image(new_image=image)
 
     return new_image
 
 
-@api.post("/predict", name="Perform prediction on selected image")
+@api.post("/predict", name="perform_prediction")
 async def predict(img_id: int, device: Device = None):
     """
     Perform predictions on selected image and update object from db.
@@ -55,17 +66,27 @@ async def predict(img_id: int, device: Device = None):
     else:
         device = "cpu"
 
-    task = make_predictions.delay(img_id, device)
-    result = AsyncResult(task.task_id)
+    if img_id < 1 or type(img_id) != int:
+        raise HTTPException(
+            status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid image id"
+        )
+
+    task = make_predictions.delay(img_id=img_id, device=device)
+    time.sleep(0.2)  # min value of sleep to update task state
+    if task.state == states.FAILURE:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No images found with that id."
+        )
+
     response = {
-        "data": {"task_id": task.task_id, "status": result.status},
+        "data": {"task_id": task.task_id, "state": task.state},
         "message": "Task received",
     }
 
     return JSONResponse(response)
 
 
-@api.get("/images", response_model=None, status_code=HTTP_200_OK)
+@api.get("/images", response_model=None, status_code=HTTP_200_OK, name="list_images")
 async def list_images(
     repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
 ):
@@ -74,29 +95,48 @@ async def list_images(
     """
     images = await repo.list_images()
 
+    if len(images) == 0:
+        return {"data": []}
+
     return {"data": [image.dict(exclude={"file"}) for image in images]}
 
 
-@api.get("/images/{img_id}", response_model=None, status_code=HTTP_200_OK)
+@api.get("/images/{img_id}", response_model=None, name="get_image_by_id")
 async def get_image(
-    img_id: str, repo: ImagesRepository = Depends(get_repository(ImagesRepository))
+    img_id: int = Path(..., title="The ID of the uploaded image", ge=1),
+    repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
 ):
     """
     Fetch image object by id
     """
-    image = await repo.get_image_by_id(id=int(img_id))
+
+    image = await repo.get_image_by_id(id=img_id)
+
+    if not image:
+        raise HTTPException(
+            status_code=HTTP_404_NOT_FOUND, detail="No images found with that id."
+        )
 
     return {"data": image.dict(exclude={"file"})}
 
 
-@api.get("/images/{img_id}/view", status_code=HTTP_200_OK)
+@api.get(
+    "/images/{img_id}/view", status_code=HTTP_200_OK, name="view_prediction_results"
+)
 async def view_prediction_result(
-    img_id: str, repo: ImagesRepository = Depends(get_repository(ImagesRepository))
+    img_id: int = Path(..., title="The ID of the uploaded image", ge=1),
+    repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
 ):
     """
     View prediction results on selected image.
     """
-    image = await repo.get_image_by_id(id=int(img_id))
+    image = await repo.get_image_by_id(id=img_id)
+
+    if image is None:
+        return JSONResponse(
+            status_code=HTTP_404_NOT_FOUND,
+            content={"message": "No images found with that id."},
+        )
 
     predictions = image.predictions
     if predictions is not None:
@@ -109,7 +149,8 @@ async def view_prediction_result(
         return StreamingResponse(io, media_type="image/jpeg")
     else:
         return JSONResponse(
-            {"message": f"Selected image with id={img_id} has no predictions"}
+            status_code=HTTP_204_NO_CONTENT,
+            content={"message": f"Selected image with id={img_id} has no predictions"},
         )
 
 
@@ -124,22 +165,22 @@ async def get_training_stats():
 
 
 @api.get("/tasks/{task_id}", status_code=HTTP_200_OK)
-async def get_task_status(task_id: str):
+async def get_task_status(task_id: str = Query(max_length=50)):
     """
     Return the status of the submitted Task
     """
     return JSONResponse(get_task_info(task_id))
 
 
-@api.delete("/images/{id}/", response_model=int, name="Delete Image")
+@api.delete("/images/{id}/", response_model=int, name="delete_image")
 async def delete_image_by_id(
-    id: int = Path(..., ge=1, title="The ID of the cleaning to delete."),
+    img_id: int = Path(..., ge=1, title="The ID of the image to delete."),
     repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
 ) -> int:
     """
     Delete image object from database.
     """
-    deleted_id = await repo.delete_image_by_id(id=id)
+    deleted_id = await repo.delete_image_by_id(id=img_id)
 
     if not deleted_id:
         raise HTTPException(

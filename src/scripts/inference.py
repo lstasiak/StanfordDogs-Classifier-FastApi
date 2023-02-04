@@ -3,9 +3,9 @@ import argparse
 from colorama import Fore, Style
 from colorama import init as colorama_init
 
-from ml.predictors import ImagePredictor  # type: ignore
-from ml.services import view_prediction
-from settings import (  # type: ignore
+from src.ml.predictors import ImagePredictor  # type: ignore
+from src.ml.services import view_prediction
+from src.settings import (  # type: ignore
     DEFAULT_MODEL_LOC,
     DEFAULT_TEST_SAMPLE,
     DEFAULT_TEST_SAMPLE_GT,

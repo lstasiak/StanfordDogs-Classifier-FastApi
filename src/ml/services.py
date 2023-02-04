@@ -1,9 +1,11 @@
-from typing import Union
+from typing import Any, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from pydantic import Json
 
+from src.ml.models.classifiers import MultiClassClassificationModel  # type: ignore
 from src.settings import DEFAULT_CLASS_NAMES, PRETRAINED_MODELS  # type: ignore
 
 plt.style.use("ggplot")
@@ -18,7 +20,6 @@ def get_default_model(
     returns model instance according to passed arguments
     :return:
     """
-    from ml.models.classifiers import MultiClassClassificationModel  # type: ignore
 
     classifier = MultiClassClassificationModel(
         base_model=PRETRAINED_MODELS[base_model]["model"],
@@ -77,7 +78,10 @@ def f1_score(
 
 
 def view_prediction(
-    img, predictions: dict, ground_truth: str = None, save: str = None
+    img,
+    predictions: Union[dict, Json],
+    ground_truth: Union[str, None] = None,
+    save: Union[Any, None] = None,
 ) -> None:
     """
     utility to visualize image and prediction results
@@ -178,7 +182,6 @@ def color_title(
         x_pos = shift
 
         for label, col in zip(labels, colors):
-
             try:
                 text[label].remove()
             except KeyError:

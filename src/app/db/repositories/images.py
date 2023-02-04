@@ -48,7 +48,8 @@ class ImagesRepository(BaseRepository):
 
     async def list_images(self):
         images = await self.db.fetch_all(query=queries.LIST_ALL_IMAGES_QUERY)
-
+        if len(images) == 0:
+            return []
         return [ImageInDB(**image) for image in images]
 
     async def delete_image_by_id(self, *, id: int):

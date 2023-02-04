@@ -8,11 +8,6 @@ services:
       - "5432:5432"
     env_file:
       - .env
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     networks:
       - ml_app_network
   web:
@@ -20,38 +15,18 @@ services:
     build: .
     ports:
       - "8000:8000"
-    command: >
-      sh -c "alembic upgrade head &&
-             uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000"
-    shm_size: 6gb # increase in case of error loading data when training model on docker
+    command: uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000
     volumes:
       - .:/code
     env_file:
       - .env
     depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - postgres
+      - redis
     image: "lukstasiak/fast-api-ml-multilabel-classification"
     networks:
       - ml_app_network
-#  jupyter:
-#    image: jupyter/minimal-notebook:latest
-#    container_name: jupyter-lab
-#    build: .
-#    command: jupyter-lab --port=8888 --no-browser --ip=0.0.0.0 --allow-root
-#    ports:
-#      - "8888:8888"
-#    volumes:
-#      - .:/code
-#      - jupyter_notebooks:/code/src/
-#    env_file:
-#      - .env
-#    networks:
-#      - ml_app_network
-#    depends_on:
-#      - web
+
   celery:
     container_name: celery
     build: .
@@ -78,4 +53,3 @@ networks:
 
 volumes:
   postgres_data:
-  jupyter_notebooks:

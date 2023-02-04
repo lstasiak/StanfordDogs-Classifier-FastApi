@@ -9,8 +9,8 @@ from torch.optim import lr_scheduler
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from ml.metrics import MetricCollector
-from ml.services import get_on_epoch_message
+from src.ml.metrics import MetricCollector
+from src.ml.services import get_on_epoch_message
 from src.settings import DATA_SPLIT, NUM_CLASSES, PARAMETERS  # type: ignore
 
 
@@ -145,7 +145,6 @@ class Trainer:
         since = time.time()
 
         for epoch in range(self.num_epochs):
-
             train_metrics = self.train_step(
                 model,
                 data_loaders["train"],

@@ -9,7 +9,7 @@ from torchvision.models import (
     resnet18,
 )
 
-from src.utils import get_labels
+from src.utils import get_labels, get_user_device
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
@@ -20,9 +20,16 @@ TRAIN_DIR = os.path.join(PROJECT_ROOT, "../data/train")
 VAL_DIR = os.path.join(PROJECT_ROOT, "../data/val")
 
 # DATASET STRUCTURE
+# created under condition, only for github-workflow purposes (no dataset repo on GitHub)
+if os.path.exists(DATA_DIR):
+    DEFAULT_CLASS_NAMES = list(dict(sorted(get_labels(DATA_DIR).items())).values())
+    DEFAULT_TEST_SAMPLE_GT = get_labels(DATA_DIR)["n02099601-golden_retriever"]
+else:
+    DEFAULT_CLASS_NAMES = [""]
+    DEFAULT_TEST_SAMPLE_GT = "Golden_Retriever"
 
-DEFAULT_CLASS_NAMES = list(dict(sorted(get_labels(DATA_DIR).items())).values())
 NUM_CLASSES = len(DEFAULT_CLASS_NAMES)
+
 DATA_SPLIT = ["train", "val"]
 DATA_DIR_LOC = [TRAIN_DIR, VAL_DIR]
 DATA_DIR_STRUCT = {phase: path for phase, path in zip(DATA_SPLIT, DATA_DIR_LOC)}
@@ -38,7 +45,7 @@ DEFAULT_TRAINING_HISTORY_DIR = os.path.join(
 DEFAULT_TEST_SAMPLE = os.path.join(
     DATA_DIR, "n02099601-golden_retriever/n02099601_67.jpg"
 )
-DEFAULT_TEST_SAMPLE_GT = get_labels(DATA_DIR)["n02099601-golden_retriever"]
+
 DEFAULT_MODEL_LOC = os.path.join(
     DEFAULT_SAVE_MODEL_DIR,
     "EfficientNet_batch_64_epochs_6_apply_head_False_model_complete.pt",
@@ -55,7 +62,7 @@ PARAMETERS = {
     "channels": 3,
     "batch_size": 64,
     "epochs": 10,
-    "device": "cpu",
+    "device": get_user_device("mps"),
     "criterion": CrossEntropyLoss(),
     "F_score_threshold": 0.4,
     "optim_fcn": Adam,

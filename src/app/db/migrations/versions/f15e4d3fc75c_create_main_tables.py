@@ -1,6 +1,6 @@
 """create_main_tables
 Revision ID: f15e4d3fc75c
-Revises: 
+Revises:
 Create Date: 2023-01-30 22:15:46.925996
 """
 
@@ -18,7 +18,7 @@ def create_images_table() -> None:
     op.create_table(
         "images",
         sa.Column("id", sa.Integer, primary_key=True),
-        sa.Column("filename", sa.Text, nullable=False, index=True),
+        sa.Column("filename", sa.Text, nullable=True),
         sa.Column("file", sa.Text, nullable=False),
         sa.Column("predictions", sa.JSON, nullable=True),
         sa.Column("ground_truth", sa.Text, nullable=True),
