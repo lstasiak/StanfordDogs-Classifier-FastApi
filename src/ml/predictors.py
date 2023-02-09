@@ -7,9 +7,8 @@ from PIL import Image
 from torchvision.transforms import Compose
 
 from src.ml.data_managers import ImageTransformer
-from src.ml.services import get_default_model, view_prediction  # type: ignore
-from src.settings import DEFAULT_CLASS_NAMES, PARAMETERS  # type: ignore
-from src.utils import get_labels  # type: ignore
+from src.ml.services import get_default_model
+from src.settings import DEFAULT_CLASS_NAMES, PARAMETERS
 from src.utils import get_user_device
 
 

@@ -1,6 +1,11 @@
 name: Python CI
 
-on: [push]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -27,15 +32,23 @@ jobs:
 
       - name: Build and run docker-compose
         run: |
-          docker-compose -f docker-compose-gh-actions.yaml build
+          docker-compose -f docker-compose-gh-actions.yaml build --no-cache --force-rm
           docker-compose -f docker-compose-gh-actions.yaml up -d
       - name: Apply alembic migrations
         run: |
           docker-compose -f docker-compose-gh-actions.yaml exec -T web alembic upgrade head
-      - name: Code check Black and Isort
+      - name: Code check - Black
         run: |
           docker-compose -f docker-compose-gh-actions.yaml exec -T web black src
+      - name: Code check - Isort
+        run: |
           docker-compose -f docker-compose-gh-actions.yaml exec -T web isort --profile black src
-      - name: Test with pytest
+      - name: Code check - MyPy
+        run: |
+          docker-compose -f docker-compose-gh-actions.yaml exec -T web mypy .
+      - name: Code lint - Ruff
+        run: |
+          docker-compose -f docker-compose-gh-actions.yaml exec -T web ruff .
+      - name: Tests
         run: |
           docker-compose -f docker-compose-gh-actions.yaml exec -T web pytest -v

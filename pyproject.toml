@@ -1,0 +1,52 @@
+[tool.ruff]
+line-length = 99
+ignore = ["E731"]
+
+[tool.mypy]
+# 3rd party import
+ignore_missing_imports = true
+# dynamic typing
+disallow_any_unimported = false
+disallow_any_expr = false
+disallow_any_decorated = false
+disallow_any_explicit = false
+disallow_any_generics = false
+disallow_subclassing_any = false
+# platform
+python_version = "3.9"
+# untyped
+disallow_untyped_calls = false
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+# None and Optional
+no_implicit_optional = true
+# Warnings
+warn_return_any = false
+warn_unreachable = true
+# Misc
+pretty = true
+
+[[tool.mypy.overrides]]
+module = [
+    "sqlalchemy",
+    "sqlalchemy.*",
+    "torch.*",
+    "pandas",
+    "numpy",
+    "celery",
+    "databases",
+    "matplotlib",
+    "fastapi",
+    "starlette",
+    "torchsummary.*",
+    "torchvision.*"
+
+]
+ignore_missing_imports = true
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+filterwarnings = ["ignore::UserWarning", "ignore:DeprecationWarning"]

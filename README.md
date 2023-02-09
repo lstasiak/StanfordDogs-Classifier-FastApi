@@ -14,6 +14,9 @@ services:
 All uploaded images are stored in Postgresql database
 as defined objects.
 
+The docker image of this project is available on my [docker-hub](https://hub.docker.com/r/lukstasiak/fast-api-ml-multilabel-classification
+)
+
 #### Goal
 The main purpose of this project is to obtain more practice and knowledge about building ML application with FastApi framework
 connected with several services in docker containers.
@@ -28,13 +31,13 @@ so the project won't crash at the start.
 
 ## Dataset & model
 The task is defined as the multi-label-classification problem. The chosen
-CNN model consists of the base model, which is pre-trained **ResNet18** network
+CNN model consists of the base model, which is pre-trained **EfficientNetV2** network
 and head model - Sequential model composed of FeedForward Neural Networks.
 
 Dataset for this task consists of 20,580 images of different dog breeds, so
 the task is 120-class classification problem.
 
-Currently, saved "best" model performs with ~70% accuracy on validation set, but training
+Currently, saved "best" model performs with ~82% accuracy on validation set, but training
 with larger epochs can probably increase this result.
 
 ## Functionality
@@ -270,7 +273,8 @@ Other functionalities defined in Makefile include e.g. code reformatting using b
 ## TO-DO
 - [x] Separate prediction and upload image endpoints
 - [x] Perform celery prediction task in the background (combined with async function)
-- [ ] Increase model performance
+- [x] Increase model performance (increased from ~70% to 82%)
 - [x] Add tests (app tests completed!)
 - [x] Make prediction visualizations available from API
-- [x] github workflow 
+- [ ] GitHub actions (there's currently working setup, but little primitive)
+- [ ] Monitoring tools

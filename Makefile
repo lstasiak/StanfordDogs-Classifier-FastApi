@@ -55,11 +55,14 @@ exec: ## Exec container
 #	docker-compose exec $(or $(c), web) pre-commit run $(or $(e), --all-files)
 
 mypy:
+	docker-compose  exec $(or $(c), web) mypy --install-types --non-interactive
 	docker-compose  exec $(or $(c), web) mypy $(or $(e), .)
 
 perform: ## Perform code by black, isort
+	docker-compose  exec $(or $(c), web) ruff $(or $(e), .)
 	docker-compose  exec $(or $(c), web) black $(or $(e), .)
 	docker-compose  exec $(or $(c), web) isort --profile black $(or $(e), .)
+
 
 predict: ## Perform prediction using python script
 	docker-compose  exec $(or $(c), web) python src/scripts/inference.py

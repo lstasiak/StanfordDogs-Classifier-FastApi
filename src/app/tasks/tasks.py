@@ -3,8 +3,8 @@ from typing import Any, Dict
 
 from asgiref.sync import async_to_sync
 from celery import states
-from celery.exceptions import Ignore
-from celery.result import AsyncResult
+from celery.exceptions import Ignore  # type: ignore
+from celery.result import AsyncResult  # type: ignore
 from databases import Database
 
 from src.app.config import DATABASE_URL
@@ -24,7 +24,7 @@ def make_predictions(self, img_id: int, device: str) -> None:
     """
     try:
         return async_to_sync(schedule_update_predictions)(img_id, device)
-    except AttributeError as exc:
+    except AttributeError:
         self.update_state(state=states.FAILURE)
         raise Ignore()
 
@@ -35,13 +35,16 @@ async def schedule_update_predictions(img_id: int, device: str) -> None:
     and make db update in separated session.
     """
 
-    async with Database(DATABASE_URL) as database:
+    async with Database(url=str(DATABASE_URL)) as database:
         repo = ImagesRepository(db=database)
         # fetch image by id
 
         image = await repo.get_image_by_id(id=img_id)
-        # decode img file to bytes
-        deserialized_file = encode_decode_img(image.file, serialize=False)
+        if image is not None:
+            # decode img file to bytes
+            deserialized_file = encode_decode_img(image.file, serialize=False)
+        else:
+            raise AttributeError
         predictions, _ = classifier.predict(file=deserialized_file, device=device)
 
         # update predictions in db

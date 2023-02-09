@@ -6,7 +6,7 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: check-added-large-files
-        exclude: ^resources/
+        exclude: ^(resources/|dataset/|github_images/)
 
 -   repo: https://github.com/psf/black
     rev: 23.1.0
@@ -18,3 +18,16 @@ repos:
     hooks:
       - id: isort
         args: ["--profile", "black", "--filter-files"]
+
+
+-   repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.40
+    hooks:
+      - id: lint
+
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.0
+    hooks:
+      - id: mypy
+        exclude: ^(resources/|dataset/|github_images/|tests/)
+#        args: [--strict]

@@ -1,5 +1,6 @@
 import time
 from io import BytesIO
+from typing import Union
 
 import pandas as pd
 from celery import states
@@ -35,8 +36,8 @@ api = APIRouter(prefix=API_PREFIX, tags=["api"])
 async def upload_image(
     file: UploadFile = File(...),
     repo: ImagesRepository = Depends(get_repository(ImagesRepository)),
-    filename: str = None,
-    ground_truth: str = None,
+    filename: Union[str, None] = None,
+    ground_truth: Union[str, None] = None,
 ):
     """
     Endpoint to handle image object creation
@@ -57,21 +58,21 @@ async def upload_image(
 
 
 @api.post("/predict", name="perform_prediction")
-async def predict(img_id: int, device: Device = None):
+async def predict(img_id: int, device: Union[Device, None] = None):
     """
     Perform predictions on selected image and update object from db.
     """
     if device is not None:
-        device = device.value
+        device_val = device.value
     else:
-        device = "cpu"
+        device_val = "cpu"
 
     if img_id < 1 or type(img_id) != int:
         raise HTTPException(
             status_code=HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid image id"
         )
 
-    task = make_predictions.delay(img_id=img_id, device=device)
+    task = make_predictions.delay(img_id=img_id, device=device_val)
     time.sleep(0.2)  # min value of sleep to update task state
     if task.state == states.FAILURE:
         raise HTTPException(

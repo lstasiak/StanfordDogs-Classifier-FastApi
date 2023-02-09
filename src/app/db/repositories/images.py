@@ -18,7 +18,7 @@ class ImagesRepository(BaseRepository):
         image = await self.db.fetch_one(
             query=queries.CREATE_IMAGE_QUERY, values=query_values
         )
-        return ImageInDB(**image)
+        return ImageInDB(**image._mapping)  # type: ignore
 
     async def update_image_predictions(self, *, id: int, predictions):
         image = await self.get_image_by_id(id=id)
@@ -30,7 +30,7 @@ class ImagesRepository(BaseRepository):
                 query=queries.UPDATE_IMAGE_PREDICTIONS_QUERY,
                 values={"id": id, "predictions": predictions},
             )
-            return ImageInDB(**updated_image)
+            return ImageInDB(**updated_image._mapping)  # type: ignore
 
         except Exception as e:
             print(e)
@@ -44,13 +44,13 @@ class ImagesRepository(BaseRepository):
         )
         if not image:
             return None
-        return ImageInDB(**image)
+        return ImageInDB(**image._mapping)
 
     async def list_images(self):
         images = await self.db.fetch_all(query=queries.LIST_ALL_IMAGES_QUERY)
         if len(images) == 0:
             return []
-        return [ImageInDB(**image) for image in images]
+        return [ImageInDB(**image._mapping) for image in images]
 
     async def delete_image_by_id(self, *, id: int):
         image = await self.get_image_by_id(id=id)

@@ -48,11 +48,12 @@ DEFAULT_TEST_SAMPLE = os.path.join(
 
 DEFAULT_MODEL_LOC = os.path.join(
     DEFAULT_SAVE_MODEL_DIR,
-    "EfficientNet_batch_64_epochs_6_apply_head_False_model_complete.pt",
+    "EfficientNet_batch_64_epochs_10_apply_head_True_model_complete.pt",
 )
+
 DEFAULT_TRAINING_HISTORY_SAMPLE = os.path.join(
     DEFAULT_TRAINING_HISTORY_DIR,
-    "EfficientNet_batch_64_epochs_6_apply_head_False_history_.csv",
+    "EfficientNet_batch_64_epochs_10_apply_head_True_history_.csv",
 )
 
 # Project parameters

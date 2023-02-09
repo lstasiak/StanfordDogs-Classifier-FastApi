@@ -1,5 +1,6 @@
 import os
 import warnings
+from typing import AsyncGenerator
 
 import alembic
 import pytest
@@ -44,7 +45,7 @@ def db(app: FastAPI) -> Database:
 
 # Make fastapi client available in all tests
 @pytest_asyncio.fixture
-async def client(app: FastAPI) -> AsyncClient:
+async def client(app: FastAPI) -> AsyncGenerator:
     async with LifespanManager(app):
         async with AsyncClient(
             app=app,
@@ -71,8 +72,6 @@ async def test_image(db: Database) -> ImageInDB:
 
 @pytest.fixture
 def celery_app(app: FastAPI):
-    from celery.contrib.testing import tasks
-
     yield celery_app
 
 

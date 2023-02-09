@@ -1,7 +1,7 @@
 import os
 from typing import Dict, List, Tuple, Union
 
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import datasets, transforms
 
 from src.settings import DATA_DIR_STRUCT, DATA_SPLIT
@@ -22,8 +22,10 @@ class DatasetCollector:
         split_ratio=None,
     ) -> None:
         """
-        :param organize: set as True when data directory is not separated into [train, test, ...] sub-dirs
-        :param split_ratio: list of split values according to which data will be split
+        :param organize: set as True when data directory is not separated
+         into [train, test, ...] sub-dirs
+        :param split_ratio: list of split values according
+         to which data will be split
         :param img_size: image size in the format: (width, height)
         :param batch_size: batch size
         :param data_root: data directory path
@@ -46,7 +48,7 @@ class DatasetCollector:
             dataset = StanfordDogsImageDataset(
                 self.data_root, classes_to_labels=classes2labels
             )
-            subsets = random_split(dataset, self.split_ratio)
+            subsets: List[Subset] = random_split(dataset, self.split_ratio)
 
             return {
                 phase: DatasetFromSubset(

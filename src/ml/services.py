@@ -1,12 +1,12 @@
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from pydantic import Json
 
-from src.ml.models.classifiers import MultiClassClassificationModel  # type: ignore
-from src.settings import DEFAULT_CLASS_NAMES, PRETRAINED_MODELS  # type: ignore
+from src.ml.models.classifiers import MultiClassClassificationModel
+from src.settings import DEFAULT_CLASS_NAMES, PRETRAINED_MODELS
 
 plt.style.use("ggplot")
 
@@ -44,10 +44,11 @@ def imshow(inp, title: Union[str, None] = None) -> None:
 
 
 def f1_score(
-    y_true: torch.Tensor, y_pred: torch.Tensor, num_classes=None, is_training=False
+    y_true: torch.Tensor, y_pred: torch.Tensor, is_training=False
 ) -> torch.Tensor:
     """
     Calculates F1 score using tensors
+    - for binary classification problem
     """
     assert y_true.ndim == 1
     assert y_pred.ndim == 1 or y_pred.ndim == 2
@@ -55,24 +56,18 @@ def f1_score(
     if y_pred.ndim == 2:
         y_pred = y_pred.argmax(dim=1)
 
-    if num_classes is None:
-        tp = (y_true * y_pred).sum().to(torch.float32)
-        # tn = ((1 - y_true) * (1 - y_pred)).sum().to(torch.float32)
-        fp = ((1 - y_true) * y_pred).sum().to(torch.float32)
-        fn = (y_true * (1 - y_pred)).sum().to(torch.float32)
+    tp = (y_true * y_pred).sum().to(torch.float32)
+    # tn = ((1 - y_true) * (1 - y_pred)).sum().to(torch.float32)
+    fp = ((1 - y_true) * y_pred).sum().to(torch.float32)
+    fn = (y_true * (1 - y_pred)).sum().to(torch.float32)
 
-        epsilon = 1e-7
+    epsilon = 1e-7
 
-        precision = tp / (tp + fp + epsilon)
-        recall = tp / (tp + fn + epsilon)
+    precision = tp / (tp + fp + epsilon)
+    recall = tp / (tp + fn + epsilon)
 
-        f1 = 2 * (precision * recall) / (precision + recall + epsilon)
-        f1.requires_grad = is_training
-
-    else:
-        tp = {}
-        fp = {}
-        fn = {}
+    f1 = 2 * (precision * recall) / (precision + recall + epsilon)
+    f1.requires_grad = is_training
 
     return f1
 
@@ -141,7 +136,7 @@ def get_file_name(model_name: str, extension: str, **kwargs) -> str:
 def get_on_epoch_message(
     epoch: int, num_epochs: int, train_metrics: dict, val_metrics: dict
 ):
-    msg = f"""Epoch: {epoch + 1}/{num_epochs}\n{"=" * 10}\n"""
+    msg = f"""\nEpoch: {epoch + 1}/{num_epochs}\n{"=" * 10}\n"""
     lines = [f"""|{" TRAIN":7s}|""", f"""|{"  VAL":7s}|"""]
     i = 0
     for line, metrics in zip(lines, [train_metrics, val_metrics]):
@@ -165,7 +160,7 @@ def color_title(
     https://github.com/alexanderthclark/Matplotlib-for-Storytellers/blob/main/Python/color_title.py
     """
 
-    if ax == None:
+    if ax is None:
         ax = plt.gca()
 
     plt.gcf().canvas.draw()
@@ -176,7 +171,7 @@ def color_title(
     shift = 0  # where the text starts
 
     # for text objects
-    text = dict()
+    text: Dict[str, Any] = dict()
 
     while (np.abs(shift - (1 - xT)) > precision) and (shift <= xT):
         x_pos = shift

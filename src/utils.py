@@ -25,7 +25,7 @@ def get_default_device():
         return torch.device("cpu")
 
 
-def get_user_device(device: str):
+def get_user_device(device: Union[str, Any]):
     available_devices = {"cpu": torch.device("cpu")}
     if torch.cuda.is_available():
         available_devices["gpu"] = torch.device("cuda:0")
@@ -37,9 +37,7 @@ def get_user_device(device: str):
     return available_devices.get(device, "cpu")
 
 
-def encode_decode_img(
-    img: Union[Any, str], serialize=True, encoding="utf-8"
-) -> Union[str, bytes]:
+def encode_decode_img(img: Any, serialize: bool = True, encoding: str = "utf-8") -> Any:
     """
     Helper function for decoding/encoding image file,
     so it can pass celery json-encoder and be correctly

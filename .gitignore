@@ -1,12 +1,11 @@
 .DS_Store
 *.pyc
-mypy.ini
-test_models
+.mypy_cache
+.ruff_cache
+.pytest_cache
 *.ipynb
 .ipynb_checkpoints
 .idea
 dataset
 *.sublime-project
 *.sublime-workspace
-pytest.ini
-.pytest_cache

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import HTMLResponse
 
-import src.app.routes as routes  # type: ignore
+import src.app.routes as routes
 from src.app import handlers
 from src.app.config import PROJECT_NAME, VERSION
 

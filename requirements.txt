@@ -34,12 +34,16 @@ psycopg2
 asgiref
 
 
-# code formatting
+# code formatting and linting
 black
 isort
+ruff
 
 colorama
 
 # typing
 mypy
 mypy-extensions
+types-colorama
+types-psycopg2
+

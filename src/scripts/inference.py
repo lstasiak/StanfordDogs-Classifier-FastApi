@@ -20,11 +20,13 @@ def main():
 
     if DEFAULT_TEST_SAMPLE_GT == predicted_class:
         print(
-            f"The output image has been classified as {Fore.GREEN}{predicted_class}{Style.RESET_ALL}"
+            f"The output image has been classified as"
+            f" {Fore.GREEN}{predicted_class}{Style.RESET_ALL}"
         )
     else:
         print(
-            f"The output image has been classified as {Fore.RED}{predicted_class}{Style.RESET_ALL}"
+            f"The output image has been classified as"
+            f" {Fore.RED}{predicted_class}{Style.RESET_ALL}"
         )
 
     view_prediction(img, preds, ground_truth=DEFAULT_TEST_SAMPLE_GT)

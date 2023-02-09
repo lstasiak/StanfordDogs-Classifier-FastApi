@@ -4,14 +4,14 @@ from logging.config import fileConfig
 
 import alembic
 from psycopg2 import DatabaseError
-from sqlalchemy import create_engine, engine_from_config, pool
+from sqlalchemy import create_engine, engine_from_config, pool  # type: ignore
 
-from src.app.config import DATABASE_URL, POSTGRES_DB  # noqa
+from src.app.config import DATABASE_URL, POSTGRES_DB
 
 # Alembic Config object, which provides access to values within the .ini file
 config = alembic.context.config
 
-fileConfig(config.config_file_name)
+fileConfig(config.config_file_name)  # type: ignore
 logger = logging.getLogger("alembic.env")
 
 

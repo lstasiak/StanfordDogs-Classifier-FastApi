@@ -4,12 +4,13 @@ import torch
 
 
 class F1Score:
-    def __init__(self, average: str = "weighted"):
+    def __init__(self, device: torch.device, average: str = "weighted"):
         """
         Class for f1 calculation in Pytorch.
 
         :param: average - averaging method
         """
+        self.device = device
         self.average = average
         if average not in [None, "micro", "macro", "weighted"]:
             raise ValueError("Wrong value of average parameter")
@@ -91,7 +92,7 @@ class F1Score:
         if self.average == "micro":
             return self.calc_f1_micro(predictions, labels)
 
-        f1_score = 0
+        f1_score = torch.zeros(1, requires_grad=False, device=self.device)
         for label_id in range(1, len(labels.unique()) + 1):
             f1, true_count = self.calc_f1_count_for_label(predictions, labels, label_id)
 
@@ -109,7 +110,7 @@ class F1Score:
 
 
 class MetricCollector:
-    def __init__(self, metrics: Iterable[str]) -> None:
+    def __init__(self, metrics: Iterable[str], device: torch.device) -> None:
         """
         Class for calculating model running metrics (e.g. accuracy, f1_score) + loss
         and collecting per epoch values.
@@ -117,6 +118,7 @@ class MetricCollector:
         :param metrics: iterable with metric codes ("acc" for accuracy, "score" for f1-score)
         """
         self.metrics = metrics
+        self.device = device
         self.current_total = {name: 0.0 for name in self.metrics}
         self.current_total["loss"] = 0.0
         self.iterations = 0.0
@@ -130,7 +132,7 @@ class MetricCollector:
                 .item()
             )
         if "score" in self.metrics:
-            f1_metric = F1Score("weighted")
+            f1_metric = F1Score(device=self.device, average="weighted")
             self.metric_func["score"] = lambda predictions, labels: f1_metric(
                 labels, predictions
             ).item()

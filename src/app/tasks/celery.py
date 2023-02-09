@@ -1,6 +1,6 @@
 import os
 
-from celery import Celery  # type: ignore
+from celery import Celery
 
 celery_app = Celery(__name__, include=["src.app.tasks.tasks"])
 

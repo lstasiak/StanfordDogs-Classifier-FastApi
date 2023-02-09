@@ -36,22 +36,7 @@ services:
     image: "lukstasiak/fast-api-ml-multilabel-classification"
     networks:
       - ml_app_network
-#  jupyter:
-#    image: jupyter/minimal-notebook:latest
-#    container_name: jupyter-lab
-#    build: .
-#    command: jupyter-lab --port=8888 --no-browser --ip=0.0.0.0 --allow-root
-#    ports:
-#      - "8888:8888"
-#    volumes:
-#      - .:/code
-#      - jupyter_notebooks:/code/src/
-#    env_file:
-#      - .env
-#    networks:
-#      - ml_app_network
-#    depends_on:
-#      - web
+
   celery:
     container_name: celery
     build: .

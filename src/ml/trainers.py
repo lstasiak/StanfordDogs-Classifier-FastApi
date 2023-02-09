@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 
 from src.ml.metrics import MetricCollector
 from src.ml.services import get_on_epoch_message
-from src.settings import DATA_SPLIT, NUM_CLASSES, PARAMETERS  # type: ignore
+from src.settings import DATA_SPLIT, PARAMETERS
 
 
 class Trainer:
@@ -20,7 +20,7 @@ class Trainer:
         criterion,
         epochs: int,
         optim_fcn,
-        device,
+        device: torch.device,
         lr: float = PARAMETERS["lr"],
         metrics=(
             "score",
@@ -137,7 +137,7 @@ class Trainer:
         optimizer = self.optim_function(model.parameters(), lr=self.lr)
 
         scheduler = lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
-        metric_calc = MetricCollector(metrics=self.metrics)
+        metric_calc = MetricCollector(metrics=self.metrics, device=self.device)
 
         best_model_wts = copy.deepcopy(model.state_dict())
         best_value = 0.0
