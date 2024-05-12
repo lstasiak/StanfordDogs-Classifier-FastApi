@@ -6,10 +6,10 @@ import torch.nn as nn
 from PIL import Image
 from torchvision.transforms import Compose
 
-from src.ml.data_managers import ImageTransformer
-from src.ml.services import get_default_model
-from src.settings import DEFAULT_CLASS_NAMES, PARAMETERS
-from src.utils import get_user_device
+from ml.data_managers import ImageTransformer
+from ml.services import get_default_model
+from project_utils import get_user_device
+from settings import DEFAULT_CLASS_NAMES, PARAMETERS
 
 
 class ImagePredictor:

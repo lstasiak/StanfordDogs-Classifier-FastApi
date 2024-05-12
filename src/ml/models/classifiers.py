@@ -1,7 +1,7 @@
 import torch.nn as nn
 from torchsummary import summary
 
-from src.settings import PARAMETERS  # type: ignore
+from settings import PARAMETERS  # type: ignore
 
 
 class MultiClassClassificationModel(nn.Module):

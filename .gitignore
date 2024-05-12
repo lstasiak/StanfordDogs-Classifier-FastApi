@@ -6,6 +6,8 @@
 *.ipynb
 .ipynb_checkpoints
 .idea
-dataset
 *.sublime-project
 *.sublime-workspace
+stanford-dogs-env.yml
+.env
+dataset

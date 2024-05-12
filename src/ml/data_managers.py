@@ -4,8 +4,8 @@ from typing import Dict, List, Tuple, Union
 from torch.utils.data import DataLoader, Subset, random_split
 from torchvision import datasets, transforms
 
-from src.settings import DATA_DIR_STRUCT, DATA_SPLIT
-from src.utils import get_labels
+from project_utils import get_labels
+from settings import DATA_DIR_STRUCT, DATA_SPLIT
 
 
 class DatasetCollector:
