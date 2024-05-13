@@ -2,14 +2,22 @@ services:
   postgres:
     container_name: postgres
     image: postgres:latest
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./create-dbs.sql:/docker-entrypoint-initdb.d/create-dbs.sql
     ports:
-      - "5432:5432"
+      - "5454:5432"
     env_file:
       - .env
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DATABASE=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DATABASE} -U $${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -17,15 +25,13 @@ services:
       - ml_app_network
   web:
     container_name: web
-    build: .
+    build: ./src
     ports:
       - "8000:8000"
-    command: >
-      sh -c "alembic upgrade head &&
-             uvicorn src.app.main:app --reload --host 0.0.0.0 --port 8000"
+    command: "sh -c 'alembic upgrade head && uvicorn backend.app.app.main:app --reload --workers 3 --host 0.0.0.0 --port 8000'"
     shm_size: 6gb # increase in case of error loading data when training model on docker
     volumes:
-      - .:/code
+      - ./src:/code
     env_file:
       - .env
     depends_on:
@@ -34,15 +40,18 @@ services:
       redis:
         condition: service_started
     image: "lukstasiak/fast-api-ml-multilabel-classification"
+    expose:
+      - 8000
     networks:
       - ml_app_network
 
   celery:
-    container_name: celery
-    build: .
-    command: celery -A src.app.tasks worker -l INFO
+    container_name: celery_worker
+    build: ./src
+#    command: celery -A backend.app.app.core.celery worker -l INFO
+    command: "watchfiles 'celery -A backend.app.app.core.celery worker -l info' "
     volumes:
-      - .:/code
+      - ./src:/code
     env_file:
       - .env
     depends_on:
@@ -52,11 +61,57 @@ services:
     networks:
       - ml_app_network
 
+  celery_beat:
+    container_name: celery_beat
+    # platform: linux/arm64/v8
+    build: ./src
+#      context: ./src/backend/app
+#      args:
+#        INSTALL_DEV: ${INSTALL_DEV-false}
+    command: celery -A backend.app.app.core.celery beat -l info -S celery_sqlalchemy_scheduler.schedulers:DatabaseScheduler -l info
+    volumes:
+      - ./src:/code
+    depends_on:
+      - web
+      - redis
+    env_file:
+      - .env
+    image: "lukstasiak/fast-api-ml-multilabel-classification"
+    networks:
+      - ml_app_network
+
   redis:
     container_name: redis
     image: redis
+    expose:
+      - 6379
+    env_file:
+      - .env
     networks:
       - ml_app_network
+
+  caddy_reverse_proxy:
+    container_name: caddy_reverse_proxy
+    image: caddy:alpine
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      EXT_ENDPOINT1: ${EXT_ENDPOINT1}
+      LOCAL_1: ${LOCAL_1}
+      PROXY_BACKEND: web
+      PROXY_PORT: 8000
+    depends_on:
+      - web
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./static:/code/static
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - ml_app_network
+
 
 networks:
   ml_app_network:
@@ -64,3 +119,5 @@ networks:
 volumes:
   postgres_data:
   jupyter_notebooks:
+  caddy_data:
+  caddy_config:

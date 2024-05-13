@@ -5,8 +5,8 @@ import numpy as np
 import torch
 from pydantic import Json
 
-from src.ml.models.classifiers import MultiClassClassificationModel
-from src.settings import DEFAULT_CLASS_NAMES, PRETRAINED_MODELS
+from ml.models.classifiers import MultiClassClassificationModel
+from settings import DEFAULT_CLASS_NAMES, PRETRAINED_MODELS
 
 plt.style.use("ggplot")
 

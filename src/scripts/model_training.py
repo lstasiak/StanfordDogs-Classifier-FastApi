@@ -3,17 +3,17 @@ import os
 
 import torch
 
-from src.ml.data_managers import DatasetCollector
-from src.ml.services import get_default_model, get_file_name
-from src.ml.trainers import Trainer
-from src.settings import (
+from ml.data_managers import DatasetCollector
+from ml.services import get_default_model, get_file_name
+from ml.trainers import Trainer
+from project_utils import get_user_device
+from settings import (
     DATA_DIR,
     DEFAULT_SAVE_MODEL_DIR,
     DEFAULT_TRAINING_HISTORY_DIR,
     NUM_CLASSES,
     PARAMETERS,
 )
-from src.utils import get_user_device
 
 
 def main():

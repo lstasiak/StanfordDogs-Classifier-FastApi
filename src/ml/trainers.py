@@ -9,9 +9,9 @@ from torch.optim import lr_scheduler
 from torch.optim.optimizer import Optimizer
 from torch.utils.data import DataLoader
 
-from src.ml.metrics import MetricCollector
-from src.ml.services import get_on_epoch_message
-from src.settings import DATA_SPLIT, PARAMETERS
+from ml.metrics import MetricCollector
+from ml.services import get_on_epoch_message
+from settings import DATA_SPLIT, PARAMETERS
 
 
 class Trainer:
@@ -130,7 +130,7 @@ class Trainer:
         :param model: torch Model class
         :param data_loaders: Dictionary containing DataLoaders for separated datasets
         :param save_history: filepath to save training stats
-        :param verbose: True/False -- can hide training messaging
+        :param verbose: True/False - whether to hide training messaging
         :return: trained model
         """
         model = model.to(self.device)

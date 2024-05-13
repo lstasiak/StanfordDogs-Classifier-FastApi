@@ -9,21 +9,37 @@ from torchvision.models import (
     resnet18,
 )
 
-from src.utils import get_labels, get_user_device
+from project_utils import get_labels, get_user_device
 
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+if PROJECT_ROOT == "/":
+    PROJECT_ROOT = "./"
 
+# RESOURCE_DIR
+RESOURCES_DIR = os.path.join(PROJECT_ROOT, "resources")
 
 # DATASET LINKS
-DATA_DIR = os.path.join(PROJECT_ROOT, "dataset/images/Images")
+DATA_DIR = os.path.join(PROJECT_ROOT, "dataset")
+ANNOTATIONS_DIR = os.path.join(DATA_DIR, "Annotation")
+LABELS_FILE = os.path.join(RESOURCES_DIR, "labels.txt")
 TRAIN_DIR = os.path.join(PROJECT_ROOT, "../data/train")
 VAL_DIR = os.path.join(PROJECT_ROOT, "../data/val")
 
 # DATASET STRUCTURE
 # created under condition, only for github-workflow purposes (no dataset repo on GitHub)
-if os.path.exists(DATA_DIR):
-    DEFAULT_CLASS_NAMES = list(dict(sorted(get_labels(DATA_DIR).items())).values())
-    DEFAULT_TEST_SAMPLE_GT = get_labels(DATA_DIR)["n02099601-golden_retriever"]
+if os.path.exists(LABELS_FILE):
+    with open(LABELS_FILE, "r") as f:
+        DEFAULT_CLASS_NAMES = f.read().splitlines()
+elif os.path.exists(ANNOTATIONS_DIR):
+    DEFAULT_CLASS_NAMES = list(
+        dict(sorted(get_labels(ANNOTATIONS_DIR).items())).values()
+    )
+    DEFAULT_TEST_SAMPLE_GT = get_labels(ANNOTATIONS_DIR)["n02099601-golden_retriever"]
+
+    with open(f"{RESOURCES_DIR}/labels.txt", "w") as f:
+        for label in DEFAULT_CLASS_NAMES:
+            f.write(label)
+            f.write("\n")
 else:
     DEFAULT_CLASS_NAMES = [""]
     DEFAULT_TEST_SAMPLE_GT = "Golden_Retriever"
@@ -35,10 +51,8 @@ DATA_DIR_LOC = [TRAIN_DIR, VAL_DIR]
 DATA_DIR_STRUCT = {phase: path for phase, path in zip(DATA_SPLIT, DATA_DIR_LOC)}
 
 # Default on save specs
-DEFAULT_SAVE_MODEL_DIR = os.path.join(PROJECT_ROOT, "resources/saved_models")
-DEFAULT_TRAINING_HISTORY_DIR = os.path.join(
-    PROJECT_ROOT, "resources/saved_train_history"
-)
+DEFAULT_SAVE_MODEL_DIR = os.path.join(RESOURCES_DIR, "saved_models")
+DEFAULT_TRAINING_HISTORY_DIR = os.path.join(RESOURCES_DIR, "saved_train_history")
 
 
 # Default files to load

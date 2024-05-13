@@ -1,0 +1,64 @@
+# dev
+pytest
+pytest-asyncio
+httpx
+asgi-lifespan
+python-multipart
+watchfiles
+
+# ML - DataScience
+pandas
+numpy
+matplotlib
+Pillow
+torch
+torchvision
+torchsummary
+
+# services
+celery[pytest]
+redis
+celery-sqlalchemy-scheduler
+
+# API
+fastapi
+pydantic[email]
+starlette
+uvicorn
+pydantic-settings
+fastapi-cache2
+fastapi-pagination
+fastapi-async-sqlalchemy
+fastapi-limiter
+
+# db setup
+sqlmodel
+databases[postgresql]
+SQLAlchemy
+alembic
+psycopg2
+SQLAlchemy-Utils
+
+# combining celery tasks and async functions
+asgiref
+
+asyncer
+
+# crypto and security
+bcrypt
+cryptography
+oso
+pyjwt
+
+# code formatting and linting
+black
+isort
+ruff
+
+colorama
+
+# typing
+mypy
+mypy-extensions
+types-colorama
+types-psycopg2
